@@ -50,7 +50,14 @@ class InstagramLoader_EntriesService extends BaseApplicationComponent
 			return;
 		}
 
-		$this->connection->setAccessToken();
+		if (!$accessToken = $settings->accessToken)
+		{
+			Craft::log('No access token given', LogLevel::Error);
+
+			return;
+		}
+
+		$this->connection->setAccessToken($accessToken);
 
 		$this->instagramUserIds = $settings->instagramUserIds;
 	}
