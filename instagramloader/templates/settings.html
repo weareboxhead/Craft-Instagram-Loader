@@ -1,6 +1,8 @@
 <div class="field" id="clientId-field">
 	<div class="heading">
 		<label for="clientId">Client ID</label>
+
+		<div class="instructions">This is the Client ID of the Client created in <a href="https://www.instagram.com/developer/" target="_blank">instagram.com/developer</a>.</div>
 	</div>
 
 	<div class="input">
@@ -8,11 +10,31 @@
 	</div>
 </div>
 
+<div class="field" id="clientSecret-field">
+	<div class="heading">
+		<label for="clientSecret">Client Secret</label>
+
+		<div class="instructions">This is the Client Secret of the Client created in <a href="https://www.instagram.com/developer/" target="_blank">instagram.com/developer</a>.</div>
+	</div>
+
+	<div class="input">
+		<input class="text  fullwidth" name="clientSecret" id="clientSecret" value="{{ settings.clientSecret }}">
+	</div>
+</div>
+
 <div class="field" id="accessToken-field">
 	<div class="heading">
 		<label for="accessToken">Access Token</label>
 
-		<div class="instructions">See <a href="https://www.instagram.com/developer/authentication/">https://www.instagram.com/developer/authentication/</a> for instructions on how to obtain a valid access token. The required scope for this plugin is "public_content"</div>
+		<div class="instructions">Click <a href="{{ siteUrl }}actions/instagramLoader/authentication/authenticate">here</a> to generate a new access token (in the form of a JSON string) to authenticate plugin's calls to Instagram.
+
+		<br>
+
+		Requires a valid Client ID and Client Secret to be set, and for the Redirect URIs in the Instagram Client to include <code>{{ siteUrl }}admin/actions/instagramLoader/authentication/authenticate</code>.
+
+		<br>
+
+		Save any other changes to these settings first before generating a token.</div>
 	</div>
 
 	<div class="input">
@@ -23,6 +45,8 @@
 <div class="field" id="sectionId-field">
 	<div class="heading">
 		<label for="sectionId">Section ID</label>
+
+		<div class="instructions">The id of the Section used. Automatically populated on plugin install.</div>
 	</div>
 
 	<div class="input">
@@ -33,6 +57,8 @@
 <div class="field" id="entryTypeId-field">
 	<div class="heading">
 		<label for="entryTypeId">Entry Type ID</label>
+
+		<div class="instructions">The id of the Entry Type used. Automatically populated on plugin install.</div>
 	</div>
 
 	<div class="input">
@@ -42,7 +68,9 @@
 
 <div class="field" id="categoryGroupId-field">
 	<div class="heading">
-		<label for="categoryGroupId">Category Group Id</label>
+		<label for="categoryGroupId">Category Group ID</label>
+
+		<div class="instructions">The id of the Category Group used. Automatically populated on plugin install.</div>
 	</div>
 
 	<div class="input">

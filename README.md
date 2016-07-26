@@ -11,28 +11,8 @@ The Section, Fields and Category Group are automatically created on installation
 * Download and extract the plugin files
 * Copy `instagramloader/` to your site's `/craft/plugins/` directory
 * Install the plugin
-* Fill in the fields in the plugin's [settings](#settings)
+* Fill in the fields in the plugin's settings
 * Load `http://[yourdomain]/actions/instagramLoader/entries/syncWithRemote`
-
-## <a name="settings"></a>Settings
-
-### Client Id
-
-This is the Client Id of the Client created in [https://instagram.com/developer/](https://www.instagram.com/developer/).
-
-### Access Token
-
-See [https://instagram.com/developer/authentication/](https://www.instagram.com/developer/authentication/) for instructions on how to obtain a valid access token. The required scope for this plugin is "public_content"
-
-### Section Id, Entry Type Id, Category Group Id
-
-These are the ids of the Section, Entry Type and Category Group used.
-
-Automatically populated on plugin install.
-
-### Instagram User Ids
-
-A comma separated list of Instagram account ids for which to retrieve content.
 
 ## Categories
 

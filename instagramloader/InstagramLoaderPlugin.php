@@ -211,6 +211,7 @@ class InstagramLoaderPlugin extends BasePlugin
 	{
 		return array(
 			'clientId'			=> array(AttributeType::String, 'default' => ''),
+			'clientSecret'		=> array(AttributeType::String, 'default' => ''),
 			'accessToken'		=> array(AttributeType::String, 'default' => ''),
 			'sectionId'			=> array(AttributeType::String, 'default' => ''),
 			'entryTypeId'		=> array(AttributeType::String, 'default' => ''),

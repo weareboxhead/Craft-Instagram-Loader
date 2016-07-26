@@ -2,84 +2,74 @@
 
 namespace Craft;
 
+use Larabros\Elogram\Client;
+
 class InstagramLoader_EntriesService extends BaseApplicationComponent
 {
 	private $callLimit = 20; // Instagram Sandbox limit
 	private $sectionId;
 	private $entryTypeId;
 	private $instagramUserIds;
-	private $connection;
+	private $client;
 
 	function __construct()
 	{
-		require_once craft()->path->getPluginsPath() . 'instagramloader/wrapper/Instagram.php';
+		require_once craft()->path->getPluginsPath() . 'instagramloader/vendor/autoload.php';
 
 		$settings = craft()->plugins->getPlugin('instagramLoader')->getSettings();
 
-		$clientId = $settings->clientId;
-
-		if (!$clientId)
+		if (!$clientId = $settings->clientId)
 		{
 			Craft::log('No Client Id provided in settings', LogLevel::Error);
 
 			return;
 		}
 
-		$this->sectionId = $settings->sectionId;
-
-		if (!$this->sectionId)
+		if (!$clientSecret = $settings->clientSecret)
 		{
-			Craft::log('No Section Id provided in settings', LogLevel::Error);
-
-			return;
-		}
-
-		$this->entryTypeId = $settings->entryTypeId;
-
-		if (!$this->entryTypeId)
-		{
-			Craft::log('No Entry Type Id provided in settings', LogLevel::Error);
-
-			return;
-		}
-
-		if (!$this->connection = new \MetzWeb\Instagram\Instagram($clientId))
-		{
-			Craft::log('Failed to instantiate connection', LogLevel::Error);
+			Craft::log('No Client Secret provided in settings', LogLevel::Error);
 
 			return;
 		}
 
 		if (!$accessToken = $settings->accessToken)
 		{
-			Craft::log('No access token given', LogLevel::Error);
+			Craft::log('No access token provided', LogLevel::Error);
 
 			return;
 		}
 
-		$this->connection->setAccessToken($accessToken);
+		if (!$this->sectionId = $settings->sectionId)
+		{
+			Craft::log('No Section Id provided in settings', LogLevel::Error);
+
+			return;
+		}
+
+		if (!$this->entryTypeId = $settings->entryTypeId)
+		{
+			Craft::log('No Entry Type Id provided in settings', LogLevel::Error);
+
+			return;
+		}
+
+		if (!$this->client = new Client($clientId, $clientSecret, $accessToken))
+		{
+			Craft::log('Failed to instantiate connection', LogLevel::Error);
+
+			return;
+		}
 
 		$this->instagramUserIds = $settings->instagramUserIds;
 	}
 
 	private function getRemoteData($userId)
 	{
-		// Call for more instagrams
-		$result = $this->connection->getUserMedia($userId, $this->callLimit);
+		// Call for remote instagrams
+		$instagrams = $this->client->users()->getMedia();
 
-		// Get the meta information returned
-		$meta = $result->meta;
-
-		// If this was not successfull,
-		if ($meta->code !== 200)
-		{
-			Craft::log('Failed to get remote Instagrams. Error type: ' . $meta->error_type . '. Error message: ' . $meta->error_message . '.', LogLevel::Error);
-
-			return false;
-		}
-
-		// Get the array of Instagrams returned
-		$instagrams = $result->data;
+		// Get the data
+		$instagrams = $instagrams->get();
 
 		$data = array(
 			'ids'			=>	array(),
@@ -89,7 +79,7 @@ class InstagramLoader_EntriesService extends BaseApplicationComponent
 		// For each Instagram
 		foreach ($instagrams as $instagram) {
 			// Get the id
-			$instagramId = $instagram->id;
+			$instagramId = $instagram['id'];
 
 			// Add this id to our array
 			$data['ids'][]						= $instagramId;
@@ -162,21 +152,21 @@ class InstagramLoader_EntriesService extends BaseApplicationComponent
 
 	private function parseContent($instagram, $caption, $userId)
 	{
-		$image 		= $instagram->images->standard_resolution;
-		$width 		= $image->width;
-		$height 	= $image->height;
+		$image 		= $instagram['images']['standard_resolution'];
+		$width 		= $image['width'];
+		$height 	= $image['height'];
 
 		// The standard content
 		$content = array(
-			'instagramId'			=>	$instagram->id,
+			'instagramId'			=>	$instagram['id'],
 			'instagramUserId'		=>	$userId,
-			'instagramFileUrl'		=>	$image->url,
-			'instagramPageUrl'		=>	$instagram->link,
+			'instagramFileUrl'		=>	$image['url'],
+			'instagramPageUrl'		=>	$instagram['link'],
 			'instagramCaption'		=>	$caption,
 			'instagramWidth'		=>	$width,
 			'instagramHeight'		=>	$height,
 			'instagramOrientation'	=>	$this->getOrientation($width, $height),
-			'instagramCategories'	=>	craft()->instagramLoader_categories->parseCategories($instagram->tags),
+			'instagramCategories'	=>	craft()->instagramLoader_categories->parseCategories($instagram['tags']),
 		);
 
 		return $content;
@@ -190,7 +180,7 @@ class InstagramLoader_EntriesService extends BaseApplicationComponent
 	private function createEntry($instagram, $userId)
 	{
 		// Format the caption
-		$caption = $instagram->caption->text;
+		$caption = $instagram['caption']['text'];
 
 		// Create a new instance of the Craft Entry Model
 		$entry = new EntryModel();
@@ -201,7 +191,7 @@ class InstagramLoader_EntriesService extends BaseApplicationComponent
 		// Set the author as super admin
 		$entry->authorId 	= 1;
 		// Set the publish date as post date
-		$entry->postDate 	= $instagram->created_time;
+		$entry->postDate 	= $instagram['created_time'];
 		// Set the title
 		$entry->getContent()->title = $this->truncateTitle($caption);
 		// Set the other content
@@ -218,7 +208,7 @@ class InstagramLoader_EntriesService extends BaseApplicationComponent
 		$content = array();
 
 		// Get the remote caption
-		$remoteCaption 	= $instagram->caption->text;
+		$remoteCaption 	= $instagram['caption']['text'];
 		// Get the local caption
 		$localCaption 	= $localEntry->instagramCaption;
 
@@ -247,7 +237,7 @@ class InstagramLoader_EntriesService extends BaseApplicationComponent
 	public function syncWithRemote()
 	{
 		// If we failed to make the connection, don't go on
-		if (!$this->connection)
+		if (!$this->client)
 		{
 			return false;
 		}

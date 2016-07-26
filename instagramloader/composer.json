@@ -1,0 +1,5 @@
+{
+    "require": {
+        "larabros/elogram": "~1.0"
+    }
+}
