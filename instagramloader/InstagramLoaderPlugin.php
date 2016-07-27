@@ -57,6 +57,10 @@ class InstagramLoaderPlugin extends BasePlugin
 			'instagramWidth'		=>	'Instagram Width',
 			'instagramHeight'		=>	'Instagram Height',
 			'instagramOrientation'	=>	'Instagram Orientation',
+			'instagramVideoUrl'		=>	'Instagram Video URL',
+			'instagramVideoWidth'	=>	'Instagram Video Width',
+			'instagramVideoHeight'	=>	'Instagram Video Height',
+			'instagramVideoOrientation'	=>	'Instagram Video Orientation',
 		);
 
 		$instagramEntryLayoutIds = array();

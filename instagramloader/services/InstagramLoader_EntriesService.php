@@ -169,6 +169,23 @@ class InstagramLoader_EntriesService extends BaseApplicationComponent
 			'instagramCategories'	=>	craft()->instagramLoader_categories->parseCategories($instagram['tags']),
 		);
 
+		// If the Instagram has a video
+		if (!empty($instagram['videos'])) {
+			$video 			= $instagram['videos']['standard_resolution'];
+			$videoWidth 	= $video['width'];
+			$videoHeight 	= $video['height'];
+
+			$videoContent = array(
+				'instagramVideoUrl'			=>	$video['url'],
+				'instagramVideoWidth'		=>	$video['width'],
+				'instagramVideoHeight'		=>	$video['height'],
+				'instagramVideoOrientation'	=>	$this->getOrientation($videoWidth, $videoHeight),
+			);
+
+			// Merge the content
+			$content = array_merge($content, $videoContent);
+		}
+
 		return $content;
 	}
 
