@@ -34,12 +34,10 @@ class InstagramLoader_CategoriesService extends BaseApplicationComponent
 		$categoryIds = array();
 
 		foreach ($tags as $tag) {
-			// If it matches one of the handles, add the id to the array and continue
-			foreach ($this->categories as $slug => $id) {
-				if ($tag === $slug)
-				{
-					$categoryIds[] = $id;
-				}
+			// If it matches one of the handles
+			if (isset($this->categories[$tag])) {
+				// Add the id to the array
+				$categoryIds[] = $this->categories[$tag];
 			}
 		}
 
