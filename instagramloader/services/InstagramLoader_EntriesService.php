@@ -177,10 +177,17 @@ class InstagramLoader_EntriesService extends BaseApplicationComponent
 		return craft()->instagramLoader_string->truncate($title);
 	}
 
+	private function formatCaption($caption)
+	{
+		// Remove any emojis from the caption as Craft will strip these anyway
+		// and sometimes deletes everything after the first emoji it comes across
+		// causing very truncated or blank titles
+		return craft()->instagramLoader_string->removeEmoji($caption);
+	}
+
 	private function createEntry($instagram, $userId)
 	{
-		// Format the caption
-		$caption = $instagram['caption']['text'];
+		$caption = $this->formatCaption($instagram['caption']['text']);
 
 		// Create a new instance of the Craft Entry Model
 		$entry = new EntryModel();
@@ -208,7 +215,7 @@ class InstagramLoader_EntriesService extends BaseApplicationComponent
 		$content = array();
 
 		// Get the remote caption
-		$remoteCaption 	= $instagram['caption']['text'];
+		$remoteCaption 	= $this->formatCaption($instagram['caption']['text']);
 		// Get the local caption
 		$localCaption 	= $localEntry->instagramCaption;
 
