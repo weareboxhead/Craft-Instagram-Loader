@@ -43,6 +43,12 @@ class InstagramLoader_AuthenticationService extends BaseApplicationComponent
 
 	public function authenticate()
 	{
+		// If we failed to make the connection, don't go on
+		if (!$this->client)
+		{
+			return false;
+		}
+
 		// If we don't have an authorization code then get one
 		if (!isset($_GET['code'])) {
 			// Direct the user to the login URL, using the public_content scope
