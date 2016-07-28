@@ -11,7 +11,7 @@ class InstagramLoaderPlugin extends BasePlugin
 
 	function getVersion()
 	{
-		return '0.2';
+		return '1.0';
 	}
 
 	function getDeveloper()
