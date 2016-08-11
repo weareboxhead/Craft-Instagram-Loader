@@ -2,7 +2,7 @@
 
 Retrieves Instagram content from a given list of Instagram accounts and saves the content as individual entries.
 
-More specifically, Instagram Loader retrieves content from a given list of Instagram accounts, saves new content as individual entries and updates the captions for existing entries.
+More specifically, Instagram Loader retrieves content from a given list of Instagram accounts, saves new content as individual entries, updates the captions for existing entries and closes entries which we can determine have been deleted from the feed.
 
 The Section, Fields and Category Group are automatically created on installation.
 

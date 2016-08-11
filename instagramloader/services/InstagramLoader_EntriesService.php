@@ -6,7 +6,6 @@ use Larabros\Elogram\Client;
 
 class InstagramLoader_EntriesService extends BaseApplicationComponent
 {
-	private $callLimit = 20; // Instagram Sandbox limit
 	private $sectionId;
 	private $entryTypeId;
 	private $instagramUserIds;
@@ -68,6 +67,11 @@ class InstagramLoader_EntriesService extends BaseApplicationComponent
 		// Call for remote instagrams
 		$instagrams = $this->client->users()->getMedia();
 
+		// If something went wrong with the call, return false
+		if (!$instagrams) {
+			return false;
+		}
+
 		// Get the data
 		$instagrams = $instagrams->get();
 
@@ -90,7 +94,7 @@ class InstagramLoader_EntriesService extends BaseApplicationComponent
 		return $data;
 	}
 
-	private function getLocalData($userId)
+	private function getLocalData($userId, $oldestRemoteInstagramCreatedTime)
 	{
 		// Create a Craft Element Criteria Model
 		$criteria = craft()->elements->getCriteria(ElementType::Entry);
@@ -102,8 +106,12 @@ class InstagramLoader_EntriesService extends BaseApplicationComponent
 		$criteria->instagramUserId 	= $userId;
 		// Include closed entries
 		$criteria->status 			= [null];
-		// Match the Instagram call limit as we don't need any more than this for the comparison
-		$criteria->limit 			= $this->callLimit;
+		// Remove the default limit in case a large number of Instagrams
+		// have been deleted
+		$criteria->limit 			= null;
+		// Restrict the parameters to entries on or after the
+		// post date of the olders instagram
+		$criteria->after 			= $oldestRemoteInstagramCreatedTime;
 
 		$data = array(
 			'ids'			=>	array(),
@@ -121,6 +129,17 @@ class InstagramLoader_EntriesService extends BaseApplicationComponent
 		}
 
 		return $data;
+	}
+
+	private function getOldestRemoteInstagramCreatedTime($remoteInstagrams)
+	{
+		// If there are no remote instagrams, return null
+		if (!$remoteInstagrams) {
+			return null;
+		}
+
+		// Return the created time of the oldest remote instagram
+		return end($remoteInstagrams)['created_time'];
 	}
 
 	private function getOrientation($width, $height)
@@ -225,6 +244,19 @@ class InstagramLoader_EntriesService extends BaseApplicationComponent
 		$this->saveEntry($entry);
 	}
 
+	private function closeEntry($entry)
+	{
+		// If this entry is already closed, we don't need to do anything
+		if (!$entry->enabled) {
+			return;
+		}
+
+		// Set the status to disabled
+		$entry->enabled = false;
+		// Save the entry!
+		$this->saveEntry($entry);
+	}
+
 	// Anything we like can be updated in here
 	private function updateEntry($localEntry, $instagram)
 	{
@@ -292,7 +324,7 @@ class InstagramLoader_EntriesService extends BaseApplicationComponent
 			}
 
 			// Get local data
-			$localData 	= $this->getLocalData($userId);
+			$localData 	= $this->getLocalData($userId, $this->getOldestRemoteInstagramCreatedTime($remoteData['instagrams']));
 
 			if (!$localData)
 			{
@@ -304,8 +336,11 @@ class InstagramLoader_EntriesService extends BaseApplicationComponent
 			// Determine which entries we are missing by id
 			$missingIds 	= 	array_diff($remoteData['ids'], $localData['ids']);
 
-			// Determine which entries need updating (all active entries which we aren't about to create)
-			$updatingIds 	=	array_diff($remoteData['ids'], $missingIds);
+			// Determine which entries we should remove by id
+			$removedIds 	= 	array_diff($localData['ids'], $remoteData['ids']);
+
+			// Determine which entries we are updating by id
+			$updatingIds 	= 	array_diff($localData['ids'], $removedIds);
 
 			// For each missing id
 			foreach ($missingIds as $id)
@@ -314,8 +349,15 @@ class InstagramLoader_EntriesService extends BaseApplicationComponent
 			    $this->createEntry($remoteData['instagrams'][$id], $userId);
 			}
 
-			// For each updating track
-			foreach ($updatingIds as $id) {
+			// For each removing id
+			foreach ($removedIds as $id)
+			{
+				$this->closeEntry($localData['instagrams'][$id]);
+			}
+
+			// For each updating id
+			foreach ($updatingIds as $id)
+			{
 				$this->updateEntry($localData['instagrams'][$id], $remoteData['instagrams'][$id]);
 			}
 		}
