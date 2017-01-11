@@ -65,7 +65,7 @@ class InstagramLoader_EntriesService extends BaseApplicationComponent
 	private function getRemoteData($userId)
 	{
 		// Call for remote instagrams
-		$instagrams = $this->client->users()->getMedia();
+		$instagrams = $this->client->users()->getMedia($userId);
 
 		// If something went wrong with the call, return false
 		if (!$instagrams) {
