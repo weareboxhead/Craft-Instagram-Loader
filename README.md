@@ -20,6 +20,10 @@ When saving new entries, Instagram Loader will check if any categories in the Ca
 
 Any which are found will be saved as categories for the entry.
 
+## Troubleshooting
+
+If the Instagram posts do not appear in your list of Entries, review Chrome's Web Developer console for logs detailing the issue, when you're accessing the syncWithRemote URL.
+
 ## Instagram Restrictions
 
 Due to recent restrictions imposed by Instagram:
