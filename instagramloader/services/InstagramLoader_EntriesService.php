@@ -236,7 +236,11 @@ class InstagramLoader_EntriesService extends BaseApplicationComponent
 		// Set the publish date as post date
 		$entry->postDate 	= $instagram['created_time'];
 		// Set the title
-		$entry->getContent()->title = $this->truncateTitle($caption);
+		if (!empty($this->truncateTitle($caption))) {
+			$entry->getContent()->title = $this->truncateTitle($caption);
+		} else {
+			$entry->getContent()->title = time();
+		}
 		// Set the other content
 		$entry->setContentFromPost($this->parseContent($instagram, $caption, $userId));
 
